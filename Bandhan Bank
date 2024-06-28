@@ -1,0 +1,77 @@
+import requests
+import json
+from bs4 import BeautifulSoup as bs
+from time import sleep
+import pandas as pd
+excel = open(r"C:\Users\IT-Admin\Desktop\sankar work\bank\Bandhan\Bandhanbranch_02_01_2024_2.xls","w",encoding="utf-8")
+for i in range(61,165):
+    url="https://bandhanbank.com/views/ajax?_wrapper_format=drupal_ajax"
+    he={'Accept': 'application/json, text/javascript, */*; q=0.01',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Connection': 'keep-alive',
+        'Content-Length': '1312',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Cookie': '_gcl_au=1.1.1394223913.1687256437; _gid=GA1.2.608053891.1688013380; TS015d33ac=01a2763667ee3dfcfdb6c379d82cc98024ca898aafa29e5d247f6f532419f452fb66b3ff5cd6d54185c25a98e4dbbb82c03a9ac572; _ga=GA1.1.732941660.1687255590; _ga_4BF1BFBY7Y=GS1.1.1688013380.8.1.1688018396.53.0.0; TSd5b8e3fa027=081a6f5139ab2000cfa5cf07d90a59345d50ee4f51bac3d852c07e3e05d0aa2a3daf39eb57beef02089465f10e11300027ed1c51664109d499194effd494c3e13deb95099f65639db2e769d728874f3dbf6939073e37d3205aae5a4fb85e2873; _ga_L29Q8E02Z4=GS1.1.1688013377.9.1.1688018471.0.0.0',
+        'Host': 'bandhanbank.com',
+        'Origin': 'https://bandhanbank.com',
+        'Referer':'https://bandhanbank.com/banking-outlet-locator',
+        'Sec-Ch-Ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"Windows"',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-origin',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+        'X-Requested-With': 'XMLHttpRequest'}
+    da={    
+        'view_name': 'branch_outlet_locator',
+        'view_display_id': 'page_2',
+        'view_args': '',
+        'view_path': '/banking-outlet-locator',
+        'view_base_path': 'banking-outlet-locator',
+        'view_dom_id': '1dc9425554d202e087eb2ee03b3ad906d0d9a48b24594711ec447d7aa18b1a5c',
+        'pager_element': '0',
+        'type': 'branch_details',
+        'field_geo_location_proximity': '500000',
+        'branch': 'All',
+        'atm': 'All',
+        'bankingunit': 'All',
+        'homeloan': 'All',
+        'actions[submit]': 'Search',
+        'page': i,
+        '_drupal_ajax': '1',
+        'ajax_page_state[theme]': 'bandhan_bank',
+        'ajax_page_state[theme_token]': '',
+        'ajax_page_state[libraries]': 'addtoany/addtoany,ajax_loader/ajax_loader.throbber,bandhan_bank/branch,bandhan_bank/global-scripts,bandhan_bank/global-styling,bandhan_bank/my-library,bandhan_employee_review/bandhan_employee_review,better_exposed_filters/general,core/html5shiv,cshs/cshs.base,geolocation/location_input.client_location,geolocation/map_center.fitlocations,geolocation/map_center.static_location,geolocation_google_maps/commonmap.google,geolocation_google_maps/google,geolocation_google_maps/mapfeature.control_locate,geolocation_google_maps/mapfeature.control_maptype,geolocation_google_maps/mapfeature.control_zoom,geolocation_google_maps/mapfeature.marker_infowindow,status_messages/status-messages,system/base,views/views.ajax,views/views.module'}
+    pg=requests.post(url,headers=he,data=da)
+    rs=pg.json()[-1]['data']
+    a=bs(rs,'html.parser')
+ 
+    b=a.findAll('div',{'class':'views-row'})
+    for j in b:
+        x=j.find('div',{'class':'col-12'}).find('a')['href']
+        
+        
+        url2='https://bandhanbank.com/'+x
+        pg2=requests.get(url2)
+        sleep(2)
+        rs2=bs(pg2.content,'html.parser')
+        c=rs2.find('section',{'class':'sections blmain blmain-details'})
+        d=c.find('div',{'class':'heading text-center'})
+        br=d.text.strip().replace('Get Direction','').strip()
+        ad=c.find('div',{'class':'sandalboxs'}).text.replace('Branch Address','').strip()
+        e=c.findAll('div',{'class':'sandalboxs'})
+        f=e[2].findAll('a')
+        mo=f[0].text
+        em=f[-1].text
+        brc=e[1].findAll('li')[1].find('input')['value']
+        try:
+            geo=c.find('h2',{'class':'location-title'}).text
+        except:
+            pass
+    
+        excel.write(repr(br)+"\t"+repr(brc)+"\t"+repr(ad)+"\t"+repr(mo)+"\t"+repr(em)+"\t"+repr(brc)+"\t"+repr(geo)+"\n")
+        n=i+1
+        print(i)
+excel.close()
