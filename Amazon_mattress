@@ -1,0 +1,145 @@
+import requests
+from bs4 import BeautifulSoup as bs
+import json
+import calendar
+from time import sleep  
+import time
+current_GMT = time.gmtime()
+n= calendar.timegm(current_GMT)
+excel = open(r"C:\Users\IT-Admin\Desktop\sankar work\amazon mattress.xls","w",encoding="utf-8")
+
+he={'Accept':  'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+ 'Accept-Encoding':  'gzip, deflate, br',
+ 'Accept-Language':  'en-US,en;q=0.9',
+ 'Cache-Control':  'max-age=0',
+ 'Cookie':  'session-id=258-6368178-8933730; i18n-prefs=INR; ubid-acbin=260-4509051-9342332; session-id-time=2082787201l; session-token=WZ0iYG7UWg6kS+OXQ5AYIU6RvPW7GBxO7Bbwl1MvgwuU7oP1ihAJ43M2mb3tVn6XAy/OPs7g/Oox6cE3kyBqkYOyQ1xg1BPU5cDDxnLVk2DHBmMYx65QOViMwDJcFIoCxgI+XEJBhgf5Wk5RddxWMmps5obz/JyaQPGddE8iTn75n+oO8sOP82PHPqkujGRcQZ5vO4XfHsRIwN+Awt9Cv0c7wI6Bi1F+/kkaQtRPp/g=; csm-hit=tb:s-WR1ZFQX07HRJP6SMRVNR|1684029307254&t:1684029308452&adb:adblk_yes',
+ 'Device-Memory':  '8',
+ 'Downlink':  '10',
+ 'Dpr':  '1',
+ 'Ect':  '4g',
+ 'Referer':  'https://www.amazon.in/?&ext_vrnc=hi&tag=googhydrabk1-21&ref=pd_sl_7hz2t19t5c_e&adgrpid=58355126069&hvpone=&hvptwo=&hvadid=486458706470&hvpos=&hvnetw=g&hvrand=12580391832469378806&hvqmt=e&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9061977&hvtargid=kwd-10573980&hydadcr=14453_2154373',
+ 'Rtt':  '0',
+ 'Sec-Ch-Device-Memory':  '8',
+ 'Sec-Ch-Dpr':  '1',
+ 'Sec-Ch-Ua':  '"Google Chrome";v="113", "Chromium";v="113", "Not-A.Brand";v="24"',
+ 'Sec-Ch-Ua-Mobile':  '?0',
+ 'Sec-Ch-Ua-Platform':  '"Windows"',
+ 'Sec-Ch-Ua-Platform-Version':  '"10.0.0"',
+ 'Sec-Ch-Viewport-Width':  '1366',
+ 'Sec-Fetch-Dest':  'document',
+ 'Sec-Fetch-Mode':  'navigate',
+ 'Sec-Fetch-Site':  'same-origin',
+ 'Sec-Fetch-User':  '?1',
+ 'Service-Worker-Navigation-Preload':  'true',
+ 'Upgrade-Insecure-Requests':  '1',
+ 'User-Agent':  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
+ 'Viewport-Width':  '1366'}
+m=0
+while m<400:
+    m=m+1
+    url="https://www.amazon.in/s?k=mattress&i=kitchen&page="+str(m)+"&qid="+str(n)+"&ref=sr_pg_"+str(m)
+    pg=requests.get(url,headers=he)
+    rs=bs(pg.content,'html.parser')
+
+    a=rs.find('div',{'id':'search'})
+    b=a.find('div',{'class':'s-desktop-width-max s-desktop-content s-wide-grid-style-t3 s-opposite-dir s-wide-grid-style sg-row'}).find('div',{'class':'sg-col-inner'})
+    c=b.find('span',{'data-component-type':'s-search-results'}).findAll('div',{'data-component-type':'s-search-result'})
+    for i in c:
+        co=0
+        while 1:
+            
+            
+            d=i['data-asin']
+            url2='https://www.amazon.in/dp/'+d+'?th=1'
+            
+            n=0
+            while n<4:
+                try:
+                    pg2=requests.get(url2,headers=he)
+                    rs3=bs(pg2.content,'html.parser')
+                    g=rs3.find('div',{'id':'dp'}).find('div',{'id':'centerCol'})
+                    h=rs3.find('div',{'id':'dp'}).find('div',{'id':'leftCol'})
+                    break
+                except:
+                    n+=1
+                    print('Sleeping...............')
+                    sleep(n*60)
+            try:
+                img=(h.find('div',{'id':'imgTagWrapperId'}).find('img'))['src']
+            except:
+                img='N/A'
+            try:
+                name=((g.find('div',{'id':'titleSection'})).find('h1')).find('span').text
+            except:
+                name='N/A'
+            try:
+                stars=(((g.find('div',{'id':'averageCustomerReviews'}))).find('a')).find('i').text
+            except:
+                stars='N/A'
+            try:
+                ratings=(g.find('div',{'id':'averageCustomerReviews'}).find('a',{'id':'acrCustomerReviewLink'})).find('span').text
+            except:
+                ratings='N/A'
+            
+            try:
+                disc=g.find('div',{'class':'a-section a-spacing-none aok-align-center'}).find('span',{'class':'a-size-large'}).text
+            except:
+                disc='N/A'
+            try:
+                price=g.find('div',{'class':'a-section a-spacing-none aok-align-center'}).find('span',{'class':'a-price'}).find('span',{'class':"a-price-whole"}).text
+            except:
+                price='N/A'
+            
+            #b=g.find('div',{'id':'corePriceDisplay_desktop_feature_div'}).find('div',{'class':'a-size-small a-color-secondary aok-align-center basisPrice'})
+            try:
+                oldprice=(g.find('div',{'class':'a-section a-spacing-small aok-align-center'}).find('span',{'class':'a-price a-text-price'})).find('span',{'aria-hidden':"true"}).text
+            except:
+                oldprice='N/A'
+            u=g.findAll('div',{'id':'productOverview_feature_div'})
+            dic0={}
+            for k in u :
+                ab=k.findAll('tr')
+                for ac in ab:
+                    z=ac.findAll('td')[0].text
+                    y=ac.findAll('td')[1].text
+                    dic0[z] =y
+            try: 
+               brand=dic0[' Brand ']
+            except:
+                 brand='N/A'
+            yh=rs3.findAll('div',{'id':'productDetails_feature_div'})
+            dic1={}
+            for l in yh:
+                    bc=l.findAll('tr')
+                    for r in bc:
+                        t=r.find('th').text
+                        x=r.find('td').text.strip(' \n\u200e')
+                        dic1[t] =x
+            details=list(dic0.items())
+            try:
+                color=dic1[' Color ']
+            except:
+                color='N/A'
+            try:
+                asin=dic1[' ASIN ']
+            except:
+                asin='N/A'
+            try:
+                date=dic1[' Date First Available ']
+            except:
+                date='N/A'
+            try:
+                item=dic1[' Item Model Number ']
+            except:
+                item='N/A'
+            try:
+                generic=dic1[' Generic Name ']
+            except:
+                generic='N/A'
+        
+        
+        
+            print(m,brand)
+            excel.write(repr(img)+"\t"+repr(brand)+"\t"+repr(name)+"\t"+repr(stars)+"\t"+repr(ratings)+"\t"+repr(disc)+"\t"+repr(price)+"\t"+repr(oldprice)+"\t"+repr(details)+"\t"+repr(color)+"\t"+repr(asin)+"\t"+repr(date)+"\t"+repr(item)+"\t"+repr(generic)+"\n")
+
+excel.close() 
